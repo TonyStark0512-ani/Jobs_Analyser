@@ -1,0 +1,85 @@
+<!-- Minimal MVP: Job Automation & Judgment Analyzer -->
+<!-- Frontend: Single HTML page -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Job Automation Analyzer</title>
+  <style>
+    body { font-family: Arial; max-width: 900px; margin: 40px auto; }
+    textarea, input, select { width: 100%; padding: 8px; margin-top: 6px; margin-bottom: 16px; }
+    button { padding: 10px 16px; }
+    .card { border:1px solid #ddd; padding:16px; margin-top:20px }
+  </style>
+</head>
+<body>
+
+<h2>Job Judgment vs Automation Analyzer</h2>
+
+<label>Job Title</label>
+<input id="jobTitle" />
+
+<label>One line job summary</label>
+<textarea id="jobSummary"></textarea>
+
+<label>Org Level</label>
+<select id="orgLevel">
+<option>IC</option>
+<option>Senior IC</option>
+<option>Manager</option>
+<option>Leader</option>
+</select>
+
+<label>Top Tools Used</label>
+<input id="tools" placeholder="Excel, Workday, Jira" />
+
+<label>Time Split</label>
+<input id="timeSplit" placeholder="Ops 40%, Strategy 20%, Meetings 20%, Email 20%" />
+
+<button onclick="analyzeJob()">Analyze Job</button>
+
+<div id="results"></div>
+
+<script>
+
+async function analyzeJob(){
+
+const payload = {
+jobTitle: document.getElementById('jobTitle').value,
+jobSummary: document.getElementById('jobSummary').value,
+orgLevel: document.getElementById('orgLevel').value,
+tools: document.getElementById('tools').value,
+timeSplit: document.getElementById('timeSplit').value
+}
+
+const response = await fetch("https://script.google.com/macros/s/AKfycbw8VEiMQ0MP4c-Brx6OgFZ-KAqTinSM25e5DWVMo4dCjEzsANNrUIkg3LgyBJxaDAzo7g/exec",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(payload)
+})
+
+const data = await response.json()
+renderResults(data)
+
+}
+
+function renderResults(data){
+
+const container = document.getElementById("results")
+
+container.innerHTML = `
+
+<div class="card">
+<h3>Judgement Tasks</h3>
+${data.judgement.map(t=>`<p><b>${t.task}</b> — ${t.reason}</p>`).join('')}
+</div>
+
+<div class="card">
+<h3>Automation Candidates</h3>
+${data.automation.map(t=>`<p><b>${t.task}</b> — ${t.automation}</p>`).join('')}
+</div>
+
+<div class="card">
+<h3>Career Recommendations</h3>
+${data.career.map(t=>`<p>• ${t}</p>`).join('')}
+      
